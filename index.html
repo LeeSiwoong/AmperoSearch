@@ -13,7 +13,7 @@
       --text-primary: #f1f5f9;
       --text-secondary: #94a3b8;
       --accent: #f59e0b;
-      --accent-glow: rgba(245, 158, 11, 0.25);
+      --accent-glow: rgba(245, 158, 11, 0.28);
       --border: #2a3042;
       --cat-drv: #ef4444;
       --cat-amp: #f59e0b;
@@ -46,7 +46,6 @@
       padding: 0 16px;
     }
 
-    /* 상단 헤더 */
     header {
       background-color: var(--bg-secondary);
       border-bottom: 1px solid var(--border);
@@ -163,7 +162,6 @@
       color: #f87171;
     }
 
-    /* 체인 라인 (A / B) */
     .chain-row {
       margin-bottom: 14px;
     }
@@ -210,13 +208,12 @@
       }
     }
 
-    /* 개별 슬롯 카드 */
     .slot-card {
       background-color: var(--bg-slot);
       border: 2px solid var(--border);
       border-radius: 10px;
       padding: 10px;
-      min-height: 112px;
+      min-height: 118px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -224,6 +221,7 @@
       position: relative;
       transition: all 0.15s;
       user-select: none;
+      overflow: hidden;
     }
 
     .slot-card:hover {
@@ -236,7 +234,16 @@
     }
 
     .slot-card.bypassed {
-      opacity: 0.45;
+      opacity: 0.42;
+    }
+
+    /* 슬롯 상단 컬러 바 */
+    .slot-color-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
     }
 
     .slot-header {
@@ -244,6 +251,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 6px;
+      margin-top: 2px;
     }
 
     .slot-num {
@@ -296,7 +304,7 @@
     .slot-body-filled {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 5px;
       flex: 1;
     }
 
@@ -306,13 +314,20 @@
       gap: 5px;
     }
 
-    .slot-model {
+    /* 구글 시트 스타일의 페달 이름 배경 칩 */
+    .pedal-name-chip {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 800;
       font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      white-space: nowrap;
+      line-height: 1.3;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .slot-based {
@@ -451,7 +466,7 @@
     }
 
     td {
-      padding: 11px 14px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
       font-size: 0.9rem;
     }
@@ -486,14 +501,14 @@
     .cat-DLY { background-color: var(--cat-dly); }
     .cat-RVB { background-color: var(--cat-rvb); }
 
-    .type-text {
+    .type-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      background-color: rgba(255, 255, 255, 0.06);
       color: var(--text-secondary);
-      font-size: 0.82rem;
-    }
-
-    .model-name {
-      font-weight: 700;
-      color: var(--text-primary);
     }
 
     .based-on {
@@ -549,7 +564,7 @@
       thead { display: none; }
       table, tbody, tr, td { display: block; width: 100%; }
       tr { padding: 12px 14px; border-bottom: 1px solid var(--border); position: relative; }
-      td { padding: 2px 0; border: none; }
+      td { padding: 3px 0; border: none; }
       td.col-action { position: absolute; right: 14px; top: 12px; width: auto; }
     }
   </style>
@@ -560,10 +575,10 @@
     <div class="container header-top">
       <h1>
         Ampero Stage Chain Builder
-        <span class="badge-title">12-SLOT &amp; REFERENCE</span>
+        <span class="badge-title">COLOR CODED &amp; 12-SLOT</span>
       </h1>
       <div style="font-size: 0.82rem; color: var(--text-secondary);">
-        슬롯을 선택한 뒤 아래 목록에서 이펙터를 클릭하면 바로 배치됩니다.
+        페달/앰프 고유 색상이 이름 배경에 표시되며, 클릭 시 선택한 슬롯에 바로 장착됩니다.
       </div>
     </div>
   </header>
@@ -624,7 +639,7 @@
           <tr>
             <th style="width: 90px;">Category</th>
             <th style="width: 140px;">Type</th>
-            <th style="width: 220px;">Model Name</th>
+            <th style="width: 250px;">Model Name</th>
             <th>Based On</th>
             <th style="width: 110px; text-align: right;">슬롯 장착</th>
           </tr>
@@ -642,6 +657,115 @@
   <script>
     // 구글 시트 웹 게시 CSV URL (연동 원할 시 입력)
     const GOOGLE_SHEET_CSV_URL = "";
+
+    /**
+     * 페달/앰프별 고유 시그니처 배경색 & 글자색 매핑 (구글 시트 컬러 팔레트 스타일)
+     * 실제 페달 케이스 색상 및 앰프 브랜드 컬러를 직관적으로 반영합니다.
+     */
+    const MODEL_COLOR_MAP = {
+      // Overdrive
+      "Green Drive":     { bg: "#bbf7d0", text: "#064e3b" }, // TS-808 Green
+      "Green 9":         { bg: "#86efac", text: "#064e3b" }, // TS-9 Green
+      "Screamood":       { bg: "#6ee7b7", text: "#064e3b" }, // TS Mod Mint Green
+      "Yellow Drive":    { bg: "#fef08a", text: "#713f12" }, // Boss OD-1 Yellow
+      "Super Drive":     { bg: "#fde047", text: "#713f12" }, // Boss SD-1 Yellow
+      "Dr. Blues":       { bg: "#93c5fd", text: "#1e3a8a" }, // Boss BD-2 Blue
+      "Force Drive":     { bg: "#f1f5f9", text: "#0f172a" }, // Fulltone OCD White
+      "Tube Clipper":    { bg: "#fde68a", text: "#78350f" }, // Butler Tube Driver
+      "Blues Butter":    { bg: "#cbd5e1", text: "#0f172a" }, // Bluesbreaker
+      "Grand Driver":    { bg: "#fcd34d", text: "#451a03" }, // Drive Master
+      "Zen Garden":      { bg: "#d9f99d", text: "#365314" }, // Zendrive
+      "Direct Touch":    { bg: "#cbd5e1", text: "#1e293b" }, // Barber Direct Drive
+      "Faun Drive":      { bg: "#f5d061", text: "#422006" }, // Klon Centaur Gold
+      "Amore Eterno":    { bg: "#e2e8f0", text: "#0f172a" }, // Lovepedal Eternity
+      "Precise Attack":  { bg: "#7dd3fc", text: "#0c4a6e" }, // Precision Drive Blue
+      "Magic T":         { bg: "#c4b5fd", text: "#2e1065" }, // Timmy Purple/Blue
+      "Prince of Drive": { bg: "#ddd6fe", text: "#3b0764" }, // Prince of Tone Purple
+      "Noble Drive":     { bg: "#a7f3d0", text: "#064e3b" }, // Nobels ODR-1 Green
+      "Swarm Drive":     { bg: "#fed7aa", text: "#7c2d12" }, // Providence SOV-2
+
+      // Fuzz & Distortion
+      "Big Pie":         { bg: "#e2e8f0", text: "#991b1b" }, // Big Muff Silver/Red
+      "Face Fuzz":       { bg: "#fca5a5", text: "#7f1d1d" }, // Fuzz Face Red
+      "Face Fuzz Ge":    { bg: "#f87171", text: "#450a0a" }, // Germanium Red
+      "Bend Fuzz":       { bg: "#d1d5db", text: "#1f2937" }, // Tone Bender Silver
+      "Plustortion":     { bg: "#fde047", text: "#713f12" }, // MXR Distortion+ Yellow
+      "Smooth Dist":     { bg: "#fdba74", text: "#7c2d12" }, // DS-1 / RAT Orange
+      "Black Tail":      { bg: "#334155", text: "#f8fafc" }, // ProCo RAT2 Black
+      "Governor":        { bg: "#fcd34d", text: "#1e293b" }, // Marshall Guv'Nor Gold
+      "Shredder":        { bg: "#fbbf24", text: "#1e293b" }, // Shred Master Gold
+      "Crunchist":       { bg: "#fca5a5", text: "#7f1d1d" }, // MI Audio Crunch Box Red
+      "Metaland":        { bg: "#475569", text: "#fb923c" }, // Boss MT-2 Metal Zone Black/Orange
+      "Rebel":           { bg: "#d8b4fe", text: "#3b0764" }, // Suhr Riot Purple
+      "Pleximaker":      { bg: "#fde68a", text: "#78350f" }, // Wampler Plexitortion
+      "Panama Lead":     { bg: "#f87171", text: "#450a0a" }, // Brown Sound EVH Red
+      "Fryman Dist":     { bg: "#fef3c7", text: "#78350f" }, // Friedman BE-OD Gold
+
+      // Bass Drive
+      "Behemoth M":      { bg: "#475569", text: "#e2e8f0" }, // Darkglass B7K Dark Gray
+      "Basshammer":      { bg: "#cbd5e1", text: "#0f172a" }, // Aguilar Silver
+      "Bass Grinder HQ": { bg: "#fef08a", text: "#1e293b" }  // SansAmp Black/Yellow
+    };
+
+    /**
+     * 모델명 키워드 및 세부 Type 기반 구글 시트 스타일 배경색 자동 결정 함수
+     */
+    function getPedalBadgeStyle(item) {
+      // 1. 시트 5번째 열에 직접 지정된 색상이 있을 경우
+      if (item.customColor) {
+        return { bg: item.customColor, text: "#0f172a" };
+      }
+
+      // 2. 개별 페달 시그니처 매핑에 존재하는 경우
+      if (MODEL_COLOR_MAP[item.model]) {
+        return MODEL_COLOR_MAP[item.model];
+      }
+
+      const m = item.model;
+      const b = item.basedOn;
+
+      // 3. 앰프/페달 브랜드 시리즈별 시그니처 컬러
+      if (m.includes("Tweed") || b.includes("Tweed")) return { bg: "#fde68a", text: "#78350f" }; // Fender Tweed
+      if (m.includes("Black") || b.includes("Blackface")) return { bg: "#cbd5e1", text: "#0f172a" }; // Fender Blackface
+      if (m.includes("Brown") || b.includes("Brownface")) return { bg: "#fed7aa", text: "#7c2d12" }; // Fender Brownface
+      if (m.includes("Silver") || b.includes("Silverface")) return { bg: "#bae6fd", text: "#0c4a6e" }; // Fender Silverface
+      if (m.includes("Marshell") || b.includes("Marshall")) return { bg: "#fcd34d", text: "#1e293b" }; // Marshall Gold
+      if (m.includes("Voxy") || b.includes("VOX")) return { bg: "#fecaca", text: "#7f1d1d" }; // VOX Red/Burgundy
+      if (m.includes("Tang") || b.includes("Orange")) return { bg: "#fdba74", text: "#7c2d12" }; // Orange Amp
+      if (m.includes("Messe") || m.includes("Rector") || m.includes("Petrus") || b.includes("Mesa")) return { bg: "#94a3b8", text: "#0f172a" }; // Mesa Boogie
+      if (m.includes("Soloist") || b.includes("Soldano")) return { bg: "#e9d5ff", text: "#4c1d95" }; // Soldano Purple/Silver
+      if (m.includes("Eddie") || b.includes("5150")) return { bg: "#fca5a5", text: "#7f1d1d" }; // 5150 Red
+      if (m.includes("Engle") || b.includes("ENGL")) return { bg: "#fecdd3", text: "#881337" }; // ENGL Red/Silver
+      if (m.includes("Dizzle") || b.includes("Diezel")) return { bg: "#bfdbfe", text: "#1e3a8a" }; // Diezel Blue
+      if (m.includes("Boger") || m.includes("Glacian") || b.includes("Bogner")) return { bg: "#c7d2fe", text: "#312e81" }; // Bogner
+      if (m.includes("Jazz Clean") || b.includes("JC-120")) return { bg: "#a5f3fc", text: "#164e63" }; // Roland JC-120
+
+      // 4. 세부 Type별 구글 시트 파스텔 팔레트 기본값
+      const typePalette = {
+        "Overdrive":       { bg: "#d9ead3", text: "#1b4332" }, // 연녹색
+        "Fuzz":            { bg: "#f4cccc", text: "#660708" }, // 연분홍/레드
+        "Distortion":      { bg: "#fce5cd", text: "#7c2d12" }, // 연주황
+        "Bass":            { bg: "#d0e0e3", text: "#1d3557" }, // 청회색
+        "Clean":           { bg: "#cfe2f3", text: "#0d3b66" }, // 스카이 블루
+        "Drive":           { bg: "#fff2cc", text: "#664d03" }, // 크림 옐로우
+        "Hi Gain":         { bg: "#ea9999", text: "#4a0404" }, // 하이게인 코랄 레드
+        "Compressor":      { bg: "#c9daf8", text: "#1e3a8a" }, // 컴프레서 블루
+        "Boost":           { bg: "#ffe599", text: "#713f12" }, // 부스트 앰버
+        "Noise Gate":      { bg: "#d9d2e9", text: "#3b0764" }, // 게이트 라벤더
+        "Acoustic":        { bg: "#f9cb9c", text: "#7c2d12" }, // 어쿠스틱 우드
+        "Filter":          { bg: "#d9d2e9", text: "#311b92" },
+        "Envelope Filter": { bg: "#ead1dc", text: "#560bad" },
+        "Auto Filter":     { bg: "#ead1dc", text: "#560bad" },
+        "Pitch":           { bg: "#b4a7d6", text: "#1e1b4b" },
+        "Special":         { bg: "#d5a6bd", text: "#4a0e2e" },
+        "Vocal":           { bg: "#f4cccc", text: "#5c001e" },
+        "Wah":             { bg: "#b6d7a8", text: "#1b4332" },
+        "EQ":              { bg: "#a2c4c9", text: "#0f172a" },
+        "Chorus":          { bg: "#a4c2f4", text: "#1e3a8a" }
+      };
+
+      return typePalette[item.type] || { bg: "#e2e8f0", text: "#0f172a" };
+    }
 
     const FALLBACK_DATA = [
       ["DRV","Overdrive","Green Drive","Ibanez TS-808 Tube Screamer"],
@@ -853,7 +977,6 @@
     let activeType = "ALL";
     let searchQuery = "";
 
-    // 12개 슬롯 상태 관리
     let slots = Array.from({ length: 12 }, () => null);
     let selectedSlotIndex = 0;
 
@@ -892,6 +1015,14 @@
         const isBypassed = slotData && slotData.bypassed;
         card.className = "slot-card" + (isSelected ? " selected" : "") + (isBypassed ? " bypassed" : "");
 
+        if (slotData) {
+          const badgeStyle = getPedalBadgeStyle(slotData);
+          const colorBar = document.createElement("div");
+          colorBar.className = "slot-color-bar";
+          colorBar.style.backgroundColor = badgeStyle.bg;
+          card.appendChild(colorBar);
+        }
+
         const header = document.createElement("div");
         header.className = "slot-header";
 
@@ -904,7 +1035,6 @@
           const actions = document.createElement("div");
           actions.className = "slot-actions";
 
-          // ON/OFF 토글 버튼
           const pwrBtn = document.createElement("button");
           pwrBtn.className = "slot-icon-btn" + (!slotData.bypassed ? " power-on" : "");
           pwrBtn.title = "ON / OFF 바이패스";
@@ -916,7 +1046,6 @@
             renderSlots();
           });
 
-          // 좌로 이동
           const leftBtn = document.createElement("button");
           leftBtn.className = "slot-icon-btn";
           leftBtn.title = "이전 슬롯과 위치 교환";
@@ -931,7 +1060,6 @@
             }
           });
 
-          // 우로 이동
           const rightBtn = document.createElement("button");
           rightBtn.className = "slot-icon-btn";
           rightBtn.title = "다음 슬롯과 위치 교환";
@@ -946,7 +1074,6 @@
             }
           });
 
-          // 삭제
           const delBtn = document.createElement("button");
           delBtn.className = "slot-icon-btn";
           delBtn.title = "슬롯 비우기";
@@ -971,6 +1098,7 @@
           emptyBody.innerHTML = `<span>+ EMPTY</span><span style="font-size:0.7rem;font-weight:400;">클릭 후 이펙터 선택</span>`;
           card.appendChild(emptyBody);
         } else {
+          const badgeStyle = getPedalBadgeStyle(slotData);
           const filledBody = document.createElement("div");
           filledBody.className = "slot-body-filled";
           filledBody.innerHTML = `
@@ -978,7 +1106,11 @@
               <span class="cat-badge cat-${slotData.category}">${slotData.category}</span>
               <span style="font-size:0.72rem; color:var(--text-secondary);">${slotData.type}</span>
             </div>
-            <div class="slot-model" title="${slotData.model}">${slotData.model}</div>
+            <div>
+              <span class="pedal-name-chip" style="background-color:${badgeStyle.bg}; color:${badgeStyle.text}; font-size:0.8rem; padding:2px 8px;" title="${slotData.model}">
+                ${slotData.model}
+              </span>
+            </div>
             <div class="slot-based" title="${slotData.basedOn}">${slotData.basedOn}</div>
           `;
           card.appendChild(filledBody);
@@ -998,12 +1130,10 @@
       });
     }
 
-    // 선택한 슬롯에 이펙터 장착
     function assignItemToSlot(item) {
       slots[selectedSlotIndex] = { ...item, bypassed: false };
       const assignedLabel = `#${selectedSlotIndex + 1} (${getSlotLabel(selectedSlotIndex)})`;
 
-      // 다음 빈 슬롯이 있으면 자동으로 포커스 이동
       const nextEmpty = slots.findIndex((s, i) => i > selectedSlotIndex && s === null);
       if (nextEmpty !== -1) {
         selectedSlotIndex = nextEmpty;
@@ -1017,7 +1147,6 @@
       showToast(`${assignedLabel} 슬롯에 [${item.model}] 장착 완료`);
     }
 
-    // 로컬 스토리지 작업 상태 유지 및 프리셋 관리
     function saveWorkingChain() {
       localStorage.setItem("ampero_working_chain_12", JSON.stringify(slots));
     }
@@ -1123,7 +1252,6 @@
       });
     });
 
-    // CSV 파서 및 데이터 초기화
     function parseCSV(text) {
       const rows = [];
       let row = [], cur = "", inQuotes = false;
@@ -1157,7 +1285,9 @@
           allItems = parsed
             .slice(1)
             .filter(r => r.length >= 4 && r[0] && r[2])
-            .map(([category, type, model, basedOn]) => ({ category, type, model, basedOn }));
+            .map(([category, type, model, basedOn, customColor]) => ({
+              category, type, model, basedOn, customColor: customColor || ""
+            }));
         } catch (e) {
           console.warn("CSV 로드 실패, 내장 데이터를 사용합니다.", e);
         }
@@ -1165,7 +1295,7 @@
 
       if (allItems.length === 0) {
         allItems = FALLBACK_DATA.map(([category, type, model, basedOn]) => ({
-          category, type, model, basedOn
+          category, type, model, basedOn, customColor: ""
         }));
       }
 
@@ -1247,10 +1377,15 @@
       const fragment = document.createDocumentFragment();
       filtered.forEach(item => {
         const tr = document.createElement("tr");
+        const badgeStyle = getPedalBadgeStyle(item);
         tr.innerHTML = `
           <td><span class="cat-badge cat-${item.category}">${item.category}</span></td>
-          <td class="type-text">${item.type}</td>
-          <td class="model-name">${item.model}</td>
+          <td><span class="type-chip">${item.type}</span></td>
+          <td>
+            <span class="pedal-name-chip" style="background-color: ${badgeStyle.bg}; color: ${badgeStyle.text};">
+              ${item.model}
+            </span>
+          </td>
           <td class="based-on">${item.basedOn}</td>
           <td class="col-action" style="text-align: right;">
             <button class="assign-btn">+ ${targetLabel} 장착</button>
