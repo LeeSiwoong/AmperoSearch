@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ampero Stage Effect & Amp Models List</title>
+  <style>
+    :root {
+      --bg-primary: #0f1117;
+      --bg-secondary: #1a1d27;
+      --bg-card: #222634;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --border: #2e3446;
+      --cat-drv: #ef4444;
+      --cat-amp: #f59e0b;
+      --cat-dyn: #3b82f6;
+      --cat-freq: #8b5cf6;
+      --cat-wah: #10b981;
+      --cat-eq: #06b6d4;
+      --cat-mod: #ec4899;
+      --cat-dly: #6366f1;
+      --cat-rvb: #14b8a6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    header {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1 span.badge-title {
+      background: var(--accent);
+      color: #000;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    .count-info {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .count-info strong {
+      color: var(--accent);
+    }
+
+    /* 검색창 */
+    .search-box {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: none;
+    }
+
+    /* 필터 버튼 */
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .sub-filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .filter-btn {
+      background-color: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      padding: 6px 13px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+
+    .filter-btn.active {
+      background-color: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    /* 메인 리스트 / 테이블 */
+    main {
+      padding: 20px;
+    }
+
+    .table-wrapper {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    thead {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 13px 16px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* 카테고리 배지 */
+    .cat-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+      min-width: 48px;
+      color: #fff;
+    }
+
+    .cat-DRV { background-color: var(--cat-drv); }
+    .cat-AMP { background-color: var(--cat-amp); color: #000; }
+    .cat-DYN { background-color: var(--cat-dyn); }
+    .cat-FREQ { background-color: var(--cat-freq); }
+    .cat-WAH { background-color: var(--cat-wah); color: #000; }
+    .cat-EQ { background-color: var(--cat-eq); color: #000; }
+    .cat-MOD { background-color: var(--cat-mod); }
+    .cat-DLY { background-color: var(--cat-dly); }
+    .cat-RVB { background-color: var(--cat-rvb); }
+
+    .type-text {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .model-name {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .based-on {
+      color: #cbd5e1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-secondary);
+    }
+
+    /* 모바일 반응형 카드 뷰 */
+    @media (max-width: 680px) {
+      thead {
+        display: none;
+      }
+      table, tbody, tr, td {
+        display: block;
+        width: 100%;
+      }
+      tr {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 3px 0;
+        border: none;
+      }
+      td.col-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      td.col-model {
+        font-size: 1.05rem;
+      }
+      td.col-based {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+      }
+      td.col-based::before {
+        content: "Based on: ";
+        color: #64748b;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <div class="header-top">
+        <h1>
+          Ampero Stage Models
+          <span class="badge-title">Quick Reference</span>
+        </h1>
+        <div class="count-info">
+          표시 중: <strong id="visibleCount">0</strong> / <span id="totalCount">0</span>개
+        </div>
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="모델명 또는 원본 장비 검색 (예: TS-808, JCM900, Centaur, Chorus...)" autocomplete="off" />
+        <button class="clear-btn" id="clearBtn" title="검색어 지우기">&times;</button>
+      </div>
+
+      <div class="filter-group" id="categoryFilters"></div>
+      <div class="sub-filter-group" id="typeFilters" style="display: none;"></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 100px;">Category</th>
+            <th style="width: 150px;">Type</th>
+            <th style="width: 240px;">Model Name</th>
+            <th>Based On</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="emptyState" class="empty-state" style="display: none;">
+        검색 조건에 맞는 이펙터/앰프 모델이 없습니다.
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /**
+     * [선택 사항] 구글 스프레드시트 실시간 CSV 연동 URL
+     * 구글 시트에서 [파일] -> [공유] -> [웹에 게시] -> [쉼표로 구분된 값(.csv)] 선택 후
+     * 발급된 링크를 아래 변수에 넣으면 시트 수정 시 자동 반영됩니다.
+     */
+    const GOOGLE_SHEET_CSV_URL = ""; 
+
+    // 시트 기본 내장 데이터
+    const FALLBACK_DATA = [
+      ["DRV","Overdrive","Green Drive","Ibanez TS-808 Tube Screamer"],
+      ["DRV","Overdrive","Green 9","Ibanez TS-9 Tube Screamer"],
+      ["DRV","Overdrive","Yellow Drive","First overdrive pedal (Boss OD-1)"],
+      ["DRV","Overdrive","Swarm Drive","Providence SOV-2 Stampede OD"],
+      ["DRV","Overdrive","Super Drive","Classic asymmetric overdrive (Boss SD-1)"],
+      ["DRV","Overdrive","Screamood","Ibanez TS-808 Mod"],
+      ["DRV","Overdrive","Dr. Blues","Boss BD-2 (PHAT modded)"],
+      ["DRV","Overdrive","Force Drive","Fulltone OCD"],
+      ["DRV","Overdrive","Tube Clipper","B.K. Butler Tube Driver"],
+      ["DRV","Overdrive","Blues Butter","Marshall Bluesbreaker"],
+      ["DRV","Overdrive","Grand Driver","Marshall Drive Master"],
+      ["DRV","Overdrive","Zen Garden","Hermida Zendrive"],
+      ["DRV","Overdrive","Direct Touch","Barber Direct Drive"],
+      ["DRV","Overdrive","Faun Drive","Klon Centaur"],
+      ["DRV","Overdrive","Amore Eterno","Lovepedal Eternity"],
+      ["DRV","Overdrive","Precise Attack","Horizon Devices Precision Drive"],
+      ["DRV","Overdrive","Magic T","Paul Cochrane Timmy (V2)"],
+      ["DRV","Overdrive","Prince of Drive","Analog.Man Prince of Tone"],
+      ["DRV","Overdrive","Noble Drive","Nobels ODR-1"],
+      ["DRV","Fuzz","Big Pie","EHX Big Muff Pi"],
+      ["DRV","Fuzz","Face Fuzz","Dallas-Arbiter Fuzz Face"],
+      ["DRV","Fuzz","Bend Fuzz","Sola Sound Tone Bender Mk II"],
+      ["DRV","Fuzz","Face Fuzz Ge","Dunlop Fuzz Face (Germanium)"],
+      ["DRV","Distortion","Plustortion","MXR M104 Distortion +"],
+      ["DRV","Distortion","Smooth Dist","Late-70s distortion (ProCo RAT/Boss DS-1)"],
+      ["DRV","Distortion","Black Tail","ProCo RAT2 (LM308 version)"],
+      ["DRV","Distortion","Governor","Marshall The Guv'Nor"],
+      ["DRV","Distortion","Shredder","Marshall Shred Master"],
+      ["DRV","Distortion","Crunchist","MI Audio Crunch Box"],
+      ["DRV","Distortion","Metaland","World's most popular heavy metal distortion (Boss MT-2)"],
+      ["DRV","Distortion","Rebel","Suhr Riot"],
+      ["DRV","Distortion","Pleximaker","Wampler Plexitortion"],
+      ["DRV","Distortion","Panama Lead","Brown sound amp inspired distortion"],
+      ["DRV","Distortion","Fryman Dist","Boutique UK-style hi-gain (Friedman BE-OD)"],
+      ["DRV","Bass","Solid Steel","Flexible drive pedal designed for bass"],
+      ["DRV","Bass","Bass OD","MXR BASS DI+ SPECIAL EDITION"],
+      ["DRV","Bass","Behemoth M","Darkglass Microtubes B7K Analog Bass Preamp"],
+      ["DRV","Bass","Basshammer","Aguilar Tone Hammer Bass Preamp"],
+      ["DRV","Bass","Bass Grinder HQ","Tech 21 SansAmp Bass Driver DI"],
+      ["AMP","Clean","Tweed Chap","Fender Tweed Champ (5F1)"],
+      ["AMP","Clean","Tweed Lux","Fender Tweed Deluxe (5E3 Bright)"],
+      ["AMP","Clean","Tweed Prince","Fender Tweed Princeton (5F2-A)"],
+      ["AMP","Clean","Baseman Norm","Fender Bassman (5F6-A Normal)"],
+      ["AMP","Clean","Black Twin","Fender 65 Twin Reverb"],
+      ["AMP","Clean","Black Deluxe","Fender Blackface Deluxe Reverb (Normal)"],
+      ["AMP","Clean","Black Deluxe+","Fender Blackface Deluxe Reverb (Vibrato)"],
+      ["AMP","Clean","Black Prince","Fender Blackface Princeton (AA964)"],
+      ["AMP","Clean","Black Super","Fender Blackface Super Reverb (AB763)"],
+      ["AMP","Clean","Black Vibra","Fender Blackface Vibroverb (AA763)"],
+      ["AMP","Clean","Brown King Clean","Fender Brownface Vibro-King (FAT off)"],
+      ["AMP","Clean","Brown Vibra","Fender Brownface Vibrolux (6G11)"],
+      ["AMP","Clean","Brown Concert","Fender Brownface Concert (6G12)"],
+      ["AMP","Clean","Brown Super","Fender Brownface Super-Amp (6G4)"],
+      ["AMP","Clean","Silver Twin","Fender Silverface Twin Reverb (AC568)"],
+      ["AMP","Clean","Silver Master","Fender Silverface Bandmaster (early AB763)"],
+      ["AMP","Clean","Superb Dual Clean","Supro Dual-Tone 1624T (CH 1)"],
+      ["AMP","Clean","Voxy 15 TB","VOX AC15 (Top Boost)"],
+      ["AMP","Clean","Voxy 30HW Norm","VOX AC30HW (Normal)"],
+      ["AMP","Clean","Hiway 103 Norm","Hiwatt DR103 (Normal)"],
+      ["AMP","Clean","Watchman","Gibson Scout"],
+      ["AMP","Clean","Jazz Clean","Roland JC-120"],
+      ["AMP","Clean","Emperor Clean","Matchless Chieftain 212"],
+      ["AMP","Clean","Match 30 Clean","Matchless DC-30"],
+      ["AMP","Clean","Tang A30 Clean","Orange AD30 (CH 1)"],
+      ["AMP","Clean","Superstar Clean","Mesa/Boogie Lone Star"],
+      ["AMP","Clean","Glacian Clean","Bogner Shiva (20th anniversary)"],
+      ["AMP","Clean","Dr. 38 Clean","Dr. Z Maz 38 Sr."],
+      ["AMP","Clean","Dr. 66","Dr. Z Route 66"],
+      ["AMP","Clean","Pendragon Clean","Grindrod Pendragon PG20C (bright off)"],
+      ["AMP","Clean","Pendragon Clean+","Grindrod Pendragon PG20C (bright on)"],
+      ["AMP","Clean","Press Wrecker","Trainwreck Express"],
+      ["AMP","Clean","Pool Wrecker","Trainwreck Liverpool"],
+      ["AMP","Clean","Hot Kitty Clean","Bad Cat Hot Cat 30 (CH 1)"],
+      ["AMP","Clean","Soloist 100 Clean","Soldano SLO100 (Normal)"],
+      ["AMP","Clean","Soloist 100 Clean HQ","Soldano SLO100 (Normal - HQ)"],
+      ["AMP","Clean","Dumbell ODS 1","Dumble Overdrive Special (Overdrive off)"],
+      ["AMP","Clean","Petrus Clean HQ","Mesa/Boogie JP-2C (CH1)"],
+      ["AMP","Drive","Baseman Bright","Fender Bassman (5F6-A Bright)"],
+      ["AMP","Drive","Brown King Drive","Fender Brownface Vibro-King (FAT on)"],
+      ["AMP","Drive","Voxy 30HW TB","VOX AC30HW (Top Boost)"],
+      ["AMP","Drive","Superb Dual Drive","Supro Dual-Tone 1624T (CH 1+2)"],
+      ["AMP","Drive","Marshell Blues","Marshall 1958 Mini Bluesbreaker"],
+      ["AMP","Drive","Marshell 45","Marshall JTM 45 (Normal)"],
+      ["AMP","Drive","Marshell 45+","Marshall JTM 45 (High Treble)"],
+      ["AMP","Drive","Marshell 45 Jump","Marshall JTM 45 (Jump)"],
+      ["AMP","Drive","Marshell 50","Marshall JMP 50 (Normal)"],
+      ["AMP","Drive","Marshell 50+","Marshall JMP 50 (High Treble)"],
+      ["AMP","Drive","Marshell 50 Jump","Marshall JMP 50 (Jump)"],
+      ["AMP","Drive","Marshell SLP","Marshall Super Lead 1959 (Normal)"],
+      ["AMP","Drive","Marshell SLP+","Marshall Super Lead 1959 (Bright)"],
+      ["AMP","Drive","Marshell SLP Jump","Marshall Super Lead 1959 (Jump)"],
+      ["AMP","Drive","Marshell 800","Marshall JCM800"],
+      ["AMP","Drive","Pendragon Drive","Grindrod Pendragon PG20C (Boost)"],
+      ["AMP","Drive","Messe IIC+","Mesa/Boogie Mark II C+ (LEAD)"],
+      ["AMP","Drive","Glacian Drive","Bogner Shiva (20th anniversary Drive)"],
+      ["AMP","Drive","Tang A30 Drive","Orange AD30 (CH 2)"],
+      ["AMP","Drive","Fryman B","UK-style boutique amp (BE channel)"],
+      ["AMP","Drive","Boger XT Blue V","Bogner Ecstasy (Blue Vintage)"],
+      ["AMP","Drive","Boger XT Blue M","Bogner Ecstasy (Blue Modern)"],
+      ["AMP","Drive","Soloist 100 Crunch","Soldano SLO100 (Normal Dirty)"],
+      ["AMP","Drive","Soloist 100 Crunch HQ","Soldano SLO100 (Normal Dirty - HQ)"],
+      ["AMP","Drive","Emperor Drive","Matchless Chieftain 212 (Driven)"],
+      ["AMP","Drive","Dr. 38 Drive","Dr. Z Maz 38 Sr. (Drive)"],
+      ["AMP","Drive","Superstar Drive","Mesa/Boogie Lone Star (Drive)"],
+      ["AMP","Drive","Hot Kitty Drive","Bad Cat Hot Cat 30 (CH 2)"],
+      ["AMP","Drive","Dumbell ODS 2","Dumble Overdrive Special (Overdrive on)"],
+      ["AMP","Drive","Petrus Crunch HQ","Mesa/Boogie JP-2C (CH2)"],
+      ["AMP","Hi Gain","Marshell 900","Marshall JCM900 (4100 CH B)"],
+      ["AMP","Hi Gain","Tang R100","Orange Rockerverb 100"],
+      ["AMP","Hi Gain","Messe IV Lead","Mesa/Boogie Mark IV (LEAD)"],
+      ["AMP","Hi Gain","Soloist 100 Lead","Soldano SLO100 (Overdrive)"],
+      ["AMP","Hi Gain","Soloist 100 Lead HQ","Soldano SLO100 (Overdrive - HQ)"],
+      ["AMP","Hi Gain","Eddie 51","Peavey 5150 (LEAD)"],
+      ["AMP","Hi Gain","Fryman HB","UK-style boutique amp (HBE channel)"],
+      ["AMP","Hi Gain","Engle Saga 1","ENGL Savage 120 E610 (CH 4 Contour off)"],
+      ["AMP","Hi Gain","Engle Saga 2","ENGL Savage 120 E610 (CH 4 Contour on)"],
+      ["AMP","Hi Gain","Powerengle Lead","ENGL Powerball II E645/2 (CH 4)"],
+      ["AMP","Hi Gain","Dizzle VH B","Diezel VH4 (CH 3 Blue)"],
+      ["AMP","Hi Gain","Dizzle VH S","Diezel VH4 (CH 3 Silver)"],
+      ["AMP","Hi Gain","Rector Dual V","Mesa/Boogie Dual Rectifier (CH 3 Vintage)"],
+      ["AMP","Hi Gain","Rector Dual M","Mesa/Boogie Dual Rectifier (CH 3 Modern)"],
+      ["AMP","Hi Gain","Dizzle VH+ B","Diezel VH4+ (CH 4 Blue)"],
+      ["AMP","Hi Gain","Dizzle VH+ S","Diezel VH4+ (CH 4 Silver)"],
+      ["AMP","Hi Gain","Boger XT Red V","Bogner Ecstasy (Red Vintage)"],
+      ["AMP","Hi Gain","Boger XT Red M","Bogner Ecstasy (Red Modern)"],
+      ["AMP","Hi Gain","Petrus Lead HQ","Mesa/Boogie JP-2C (CH3)"],
+      ["AMP","Bass","Ampage Classic","Ampeg SVT"],
+      ["AMP","Bass","Ampage Flip","Ampeg B-15"],
+      ["AMP","Bass","Voxy Bass","VOX AC-100"],
+      ["AMP","Bass","Tang Bass","Orange AD200B"],
+      ["AMP","Bass","Messe Bass 400","Mesa/Boogie Bass 400"],
+      ["DYN","Compressor","Comprosso","Ross Compressor"],
+      ["DYN","Compressor","Comparoma 4","Keeley C4 4-knob compressor"],
+      ["DYN","Compressor","Blue Sustainer","Boss Compression Sustainer (CS-1)"],
+      ["DYN","Compressor","Squeezer","Fully-functional compressor with Tone knob"],
+      ["DYN","Boost","Affinity Boost","Xotic AC Booster"],
+      ["DYN","Boost","Beefy Boost","Xotic BB Preamp"],
+      ["DYN","Boost","Pristine Boost","Xotic RC Booster"],
+      ["DYN","Boost","Forest Boost","Fortin Grind"],
+      ["DYN","Boost","Treble Ranger","Dallas Rangemaster Treble Booster"],
+      ["DYN","Boost","Micro Boost","MXR M133 Micro Amp"],
+      ["DYN","Boost","Creamy","Eric Clapton \"Woman Tone\" simulator"],
+      ["DYN","Boost","FET Boost","FET-based belt clip preamp"],
+      ["DYN","Boost","Enhancer","Xotic EP Booster"],
+      ["DYN","Boost","Gated Boost","Modern gated boost"],
+      ["DYN","Noise Gate","Al Gate","ISP Decimator"],
+      ["DYN","Noise Gate","Fast Gate","2-mode noise gate"],
+      ["DYN","Noise Gate","Custom Gate","Fully-functional noise gate"],
+      ["FREQ","Acoustic","Acoustic Refiner","Acoustic guitar enhancer"],
+      ["FREQ","Acoustic","AC Sim","Acoustic simulator for electric guitars"],
+      ["FREQ","Filter","Low Pass / Band Pass / High Pass / Notch / Peak","Various EQ filters"],
+      ["FREQ","Filter","Low Shelf / High Shelf / Tilt EQ","Shelving and Tilt EQ filters"],
+      ["FREQ","Filter","Moo VCF LP / BP / HP / Env","Moog VCF"],
+      ["FREQ","Envelope Filter","Toucher G / B","Envelope filter for guitar/bass"],
+      ["FREQ","Envelope Filter","Envelope","Customable envelope filter"],
+      ["FREQ","Auto Filter","Crier G / B","Auto-wah for guitar/bass"],
+      ["FREQ","Auto Filter","LFO Filter","LFO-based auto filter"],
+      ["FREQ","Auto Filter","Vocal Filter","Auto filter with two human-like voices"],
+      ["FREQ","Auto Filter","Path Filter 4 / 8","4/8-step filter machine"],
+      ["FREQ","Auto Filter","Pattern Filter","Pattern filter machine"],
+      ["FREQ","Pitch","Analog Octa 1 / 2","Monophonic octaver (1/2 oct down)"],
+      ["FREQ","Pitch","Digital Octa","Polyphonic octaver (1 oct up/down)"],
+      ["FREQ","Pitch","Dual Pitch / Quad Pitch","2/4-voice polyphonic pitch shifter"],
+      ["FREQ","Pitch","Classic PS","Whammy style monophonic pitch shifter"],
+      ["FREQ","Pitch","Pitch Shift","Polyphonic pitch shifter"],
+      ["FREQ","Pitch","Detune / Dual Detune / Quad Detune","1/2/4-voice detune effect"],
+      ["FREQ","Pitch","80s Detune","1980s red pitch bend pedal"],
+      ["FREQ","Pitch","String Shifter","Polyphonic pitch shifter for down tunings"],
+      ["FREQ","Pitch","Harmony 1 / 2","1/2-voice automatic harmony"],
+      ["FREQ","Special","12-Stringer","12-string guitar simulator"],
+      ["FREQ","Special","Bit Krusher","Bitcrusher/sample rate reducer"],
+      ["FREQ","Special","Ring Mod","Ring modulator"],
+      ["FREQ","Special","Telephone Line","Old phone simulator filter"],
+      ["FREQ","Special","Satisfaction","Vintage reel-to-reel tape saturation"],
+      ["FREQ","Vocal","Mic Lab","Vintage microphone simulator"],
+      ["FREQ","Vocal","Pitch Correction","Automatic vocal pitch correction"],
+      ["FREQ","Vocal","AT-Tune","Advanced pitch correction/shift for vocals"],
+      ["FREQ","Vocal","Vocal Harmony","Dual voice automatic harmonizer for vocals"],
+      ["WAH","Wah","Clay Wah","VOX Clyde McCoy"],
+      ["WAH","Wah","Voxy Wah","VOX V845"],
+      ["WAH","Wah","Voxy Wah+","VOX V846"],
+      ["WAH","Wah","Color Wah","Colorsound Wah-Wah"],
+      ["WAH","Wah","Funky Wah","\"Shaft\" sound funky wah"],
+      ["WAH","Wah","Magic Wah","Morley Power Wah"],
+      ["WAH","Wah","Soul Press","Hotone Soul Press (WAH mode)"],
+      ["WAH","Wah","Bass Press","Hotone Bass Press (WAH mode)"],
+      ["WAH","Wah","Cry Wah","Dunlop CryBaby"],
+      ["WAH","Wah","Cry Wah+","Dunlop CryBaby 535Q"],
+      ["WAH","Wah","Petrus Wah","Dunlop JP95 John Petrucci CryBaby"],
+      ["WAH","Wah","Sandman Wah","Dunlop KH95 Kirk Hammett CryBaby"],
+      ["WAH","Wah","Chili Wah","Ibanez WH-10"],
+      ["EQ","EQ","Guitar EQ 1 / 2","5-band EQ for guitar"],
+      ["EQ","EQ","Bass EQ 1 / 2","5-band EQ for bass"],
+      ["EQ","EQ","V-EQ","Mesa/Boogie Mark Series 5-band graphic EQ"],
+      ["EQ","EQ","Graphic 7 / 7B","7-band graphic EQ for guitar/bass"],
+      ["EQ","EQ","Para EQ 1 / 2","4/5-band parametric equalizer"],
+      ["EQ","EQ","Graphic EQ","10-band equalizer"],
+      ["MOD","Chorus","Aozora Chorus","Arion SCH-1 Stereo Chorus"],
+      ["MOD","Chorus","Grand Choruium","Boss CE-1"],
+      ["MOD","Chorus","Liquid C","Boss Dimension C"],
+      ["MOD","Chorus","Bass Chorus","Ensemble chorus tuned for bass"],
+      ["MOD","Chorus","Liquid Dream","Voodoo Lab Analog Chorus"]
+    ];
+
+    let allItems = [];
+    let activeCategory = "ALL";
+    let activeType = "ALL";
+    let searchQuery = "";
+
+    const tableBody = document.getElementById("tableBody");
+    const categoryFilters = document.getElementById("categoryFilters");
+    const typeFilters = document.getElementById("typeFilters");
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearBtn");
+    const visibleCountEl = document.getElementById("visibleCount");
+    const totalCountEl = document.getElementById("totalCount");
+    const emptyState = document.getElementById("emptyState");
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cur = "";
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (inQuotes) {
+          if (ch === '"' && text[i + 1] === '"') {
+            cur += '"';
+            i++;
+          } else if (ch === '"') {
+            inQuotes = false;
+          } else {
+            cur += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ",") {
+            row.push(cur.trim());
+            cur = "";
+          } else if (ch === "\n" || ch === "\r") {
+            if (cur || row.length > 0) {
+              row.push(cur.trim());
+              rows.push(row);
+              row = [];
+              cur = "";
+            }
+          } else {
+            cur += ch;
+          }
+        }
+      }
+      if (cur || row.length > 0) {
+        row.push(cur.trim());
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    async function initData() {
+      if (GOOGLE_SHEET_CSV_URL) {
+        try {
+          const res = await fetch(GOOGLE_SHEET_CSV_URL);
+          const csvText = await res.text();
+          const parsed = parseCSV(csvText);
+          allItems = parsed
+            .slice(1)
+            .filter(r => r.length >= 4 && r[0] && r[2])
+            .map(([category, type, model, basedOn]) => ({ category, type, model, basedOn }));
+        } catch (e) {
+          console.warn("CSV 로드 실패, 내장 데이터를 사용합니다.", e);
+        }
+      }
+
+      if (allItems.length === 0) {
+        allItems = FALLBACK_DATA.map(([category, type, model, basedOn]) => ({
+          category, type, model, basedOn
+        }));
+      }
+
+      totalCountEl.textContent = allItems.length;
+      renderCategoryButtons();
+      renderTable();
+    }
+
+    function renderCategoryButtons() {
+      const categories = ["ALL", ...new Set(allItems.map(item => item.category))];
+      categoryFilters.innerHTML = "";
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "filter-btn" + (cat === activeCategory ? " active" : "");
+        btn.textContent = cat === "ALL" ? "전체 (ALL)" : cat;
+        btn.addEventListener("click", () => {
+          activeCategory = cat;
+          activeType = "ALL";
+          renderCategoryButtons();
+          renderTypeButtons();
+          renderTable();
+        });
+        categoryFilters.appendChild(btn);
+      });
+    }
+
+    function renderTypeButtons() {
+      if (activeCategory === "ALL") {
+        typeFilters.style.display = "none";
+        typeFilters.innerHTML = "";
+        return;
+      }
+
+      const types = ["ALL", ...new Set(
+        allItems.filter(i => i.category === activeCategory).map(i => i.type)
+      )];
+
+      if (types.length <= 2) {
+        typeFilters.style.display = "none";
+        return;
+      }
+
+      typeFilters.style.display = "flex";
+      typeFilters.innerHTML = "";
+      types.forEach(type => {
+        const btn = document.createElement("button");
+        btn.className = "filter-btn" + (type === activeType ? " active" : "");
+        btn.textContent = type === "ALL" ? "전체 타입" : type;
+        btn.addEventListener("click", () => {
+          activeType = type;
+          renderTypeButtons();
+          renderTable();
+        });
+        typeFilters.appendChild(btn);
+      });
+    }
+
+    function renderTable() {
+      const q = searchQuery.toLowerCase();
+      const filtered = allItems.filter(item => {
+        const matchCat = activeCategory === "ALL" || item.category === activeCategory;
+        const matchType = activeType === "ALL" || item.type === activeType;
+        const matchSearch = !q ||
+          item.model.toLowerCase().includes(q) ||
+          item.basedOn.toLowerCase().includes(q) ||
+          item.type.toLowerCase().includes(q) ||
+          item.category.toLowerCase().includes(q);
+        return matchCat && matchType && matchSearch;
+      });
+
+      visibleCountEl.textContent = filtered.length;
+      tableBody.innerHTML = "";
+
+      if (filtered.length === 0) {
+        emptyState.style.display = "block";
+        return;
+      }
+      emptyState.style.display = "none";
+
+      const fragment = document.createDocumentFragment();
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="col-meta">
+            <span class="cat-badge cat-${item.category}">${item.category}</span>
+          </td>
+          <td class="type-text">${item.type}</td>
+          <td class="col-model model-name">${item.model}</td>
+          <td class="col-based based-on">${item.basedOn}</td>
+        `;
+        fragment.appendChild(tr);
+      });
+      tableBody.appendChild(fragment);
+    }
+
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value.trim();
+      clearBtn.style.display = searchQuery ? "block" : "none";
+      renderTable();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      searchQuery = "";
+      clearBtn.style.display = "none";
+      searchInput.focus();
+      renderTable();
+    });
+
+    initData();
+  </script>
+</body>
+</html>
