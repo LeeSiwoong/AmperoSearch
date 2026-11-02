@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ampero Stage Effect & Amp Models List</title>
+  <title>Ampero Stage 12-Slot Chain Builder & Models List</title>
   <style>
     :root {
-      --bg-primary: #0f1117;
-      --bg-secondary: #1a1d27;
-      --bg-card: #222634;
+      --bg-primary: #0b0d13;
+      --bg-secondary: #151822;
+      --bg-card: #1e2330;
+      --bg-slot: #131620;
       --text-primary: #f1f5f9;
       --text-secondary: #94a3b8;
       --accent: #f59e0b;
-      --accent-hover: #d97706;
-      --border: #2e3446;
+      --accent-glow: rgba(245, 158, 11, 0.25);
+      --border: #2a3042;
       --cat-drv: #ef4444;
       --cat-amp: #f59e0b;
       --cat-dyn: #3b82f6;
@@ -35,23 +36,21 @@
       font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-primary);
       color: var(--text-primary);
-      line-height: 1.5;
-      padding-bottom: 60px;
-    }
-
-    header {
-      background-color: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      padding: 24px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      line-height: 1.45;
+      padding-bottom: 80px;
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* 상단 헤더 */
+    header {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 0;
     }
 
     .header-top {
@@ -60,52 +59,305 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 16px;
     }
 
     h1 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--text-primary);
+      font-size: 1.35rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    h1 span.badge-title {
+    .badge-title {
       background: var(--accent);
       color: #000;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       padding: 3px 8px;
-      border-radius: 6px;
+      border-radius: 5px;
       font-weight: 800;
     }
 
-    .count-info {
-      font-size: 0.9rem;
+    /* 12슬롯 체인 빌더 영역 */
+    .builder-section {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .builder-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .builder-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .builder-hint {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .preset-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .preset-controls input,
+    .preset-controls select {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .btn {
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      border-color: var(--text-secondary);
+      background-color: #293042;
+    }
+
+    .btn-accent {
+      background-color: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .btn-accent:hover {
+      background-color: #d97706;
+      border-color: #d97706;
+    }
+
+    .btn-danger {
+      color: #f87171;
+    }
+
+    /* 체인 라인 (A / B) */
+    .chain-row {
+      margin-bottom: 14px;
+    }
+
+    .chain-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .chain-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chain-label span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent);
+      display: inline-block;
+    }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 960px) {
+      .slots-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 540px) {
+      .slots-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* 개별 슬롯 카드 */
+    .slot-card {
+      background-color: var(--bg-slot);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 112px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .slot-card:hover {
+      border-color: #475569;
+    }
+
+    .slot-card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .slot-card.bypassed {
+      opacity: 0.45;
+    }
+
+    .slot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .slot-num {
+      font-size: 0.72rem;
+      font-weight: 800;
       color: var(--text-secondary);
     }
 
-    .count-info strong {
-      color: var(--accent);
+    .slot-actions {
+      display: flex;
+      gap: 3px;
     }
 
-    /* 검색창 */
+    .slot-icon-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: none;
+      color: var(--text-secondary);
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slot-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .slot-icon-btn.power-on {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    .slot-body-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: #475569;
+      font-size: 0.8rem;
+      font-weight: 600;
+      gap: 2px;
+    }
+
+    .slot-body-filled {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+    }
+
+    .slot-cat-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .slot-model {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .slot-based {
+      font-size: 0.73rem;
+      color: var(--text-secondary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* 검색 및 필터 영역 */
+    .filter-section {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 18px;
+      position: sticky;
+      top: 10px;
+      z-index: 90;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
     .search-box {
       position: relative;
-      margin-bottom: 14px;
+      flex: 1;
     }
 
     .search-box input {
       width: 100%;
-      padding: 12px 40px 12px 16px;
+      padding: 10px 36px 10px 14px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background-color: var(--bg-primary);
       color: var(--text-primary);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       outline: none;
-      transition: border-color 0.2s;
     }
 
     .search-box input:focus {
@@ -114,7 +366,7 @@
 
     .clear-btn {
       position: absolute;
-      right: 12px;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
       background: none;
@@ -125,18 +377,27 @@
       display: none;
     }
 
-    /* 필터 버튼 */
+    .count-info {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .count-info strong {
+      color: var(--accent);
+    }
+
     .filter-group {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 8px;
     }
 
     .sub-filter-group {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
+      margin-top: 8px;
       padding-top: 8px;
       border-top: 1px dashed var(--border);
     }
@@ -145,17 +406,15 @@
       background-color: var(--bg-card);
       color: var(--text-secondary);
       border: 1px solid var(--border);
-      padding: 6px 13px;
+      padding: 5px 11px;
       border-radius: 6px;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.15s;
     }
 
     .filter-btn:hover {
       color: var(--text-primary);
-      border-color: var(--text-secondary);
     }
 
     .filter-btn.active {
@@ -164,16 +423,13 @@
       border-color: var(--accent);
     }
 
-    /* 메인 리스트 / 테이블 */
-    main {
-      padding: 20px;
-    }
-
+    /* 테이블 리스트 */
     .table-wrapper {
       background-color: var(--bg-secondary);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
+      margin-top: 16px;
     }
 
     table {
@@ -188,36 +444,35 @@
     }
 
     th {
-      padding: 13px 16px;
-      font-size: 0.8rem;
+      padding: 12px 14px;
+      font-size: 0.76rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
       color: var(--text-secondary);
     }
 
     td {
-      padding: 13px 16px;
+      padding: 11px 14px;
       border-bottom: 1px solid var(--border);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
     }
 
-    tr:last-child td {
-      border-bottom: none;
+    tbody tr {
+      cursor: pointer;
+      transition: background-color 0.12s;
     }
 
     tbody tr:hover {
-      background-color: rgba(255, 255, 255, 0.03);
+      background-color: rgba(245, 158, 11, 0.08);
     }
 
-    /* 카테고리 배지 */
     .cat-badge {
       display: inline-block;
-      padding: 3px 8px;
-      border-radius: 5px;
-      font-size: 0.75rem;
-      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 800;
       text-align: center;
-      min-width: 48px;
+      min-width: 44px;
       color: #fff;
     }
 
@@ -233,8 +488,7 @@
 
     .type-text {
       color: var(--text-secondary);
-      font-size: 0.85rem;
-      font-weight: 500;
+      font-size: 0.82rem;
     }
 
     .model-name {
@@ -246,82 +500,133 @@
       color: #cbd5e1;
     }
 
+    .assign-btn {
+      background-color: var(--bg-card);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover .assign-btn {
+      background-color: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
     .empty-state {
       text-align: center;
-      padding: 48px 20px;
+      padding: 40px 20px;
       color: var(--text-secondary);
     }
 
-    /* 모바일 반응형 카드 뷰 */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: var(--accent);
+      color: #000;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
     @media (max-width: 680px) {
-      thead {
-        display: none;
-      }
-      table, tbody, tr, td {
-        display: block;
-        width: 100%;
-      }
-      tr {
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--border);
-      }
-      td {
-        padding: 3px 0;
-        border: none;
-      }
-      td.col-meta {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 4px;
-      }
-      td.col-model {
-        font-size: 1.05rem;
-      }
-      td.col-based {
-        font-size: 0.88rem;
-        color: var(--text-secondary);
-      }
-      td.col-based::before {
-        content: "Based on: ";
-        color: #64748b;
-      }
+      thead { display: none; }
+      table, tbody, tr, td { display: block; width: 100%; }
+      tr { padding: 12px 14px; border-bottom: 1px solid var(--border); position: relative; }
+      td { padding: 2px 0; border: none; }
+      td.col-action { position: absolute; right: 14px; top: 12px; width: auto; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="container">
-      <div class="header-top">
-        <h1>
-          Ampero Stage Models
-          <span class="badge-title">Quick Reference</span>
-        </h1>
-        <div class="count-info">
-          표시 중: <strong id="visibleCount">0</strong> / <span id="totalCount">0</span>개
-        </div>
+    <div class="container header-top">
+      <h1>
+        Ampero Stage Chain Builder
+        <span class="badge-title">12-SLOT &amp; REFERENCE</span>
+      </h1>
+      <div style="font-size: 0.82rem; color: var(--text-secondary);">
+        슬롯을 선택한 뒤 아래 목록에서 이펙터를 클릭하면 바로 배치됩니다.
       </div>
-
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="모델명 또는 원본 장비 검색 (예: TS-808, JCM900, Centaur, Chorus...)" autocomplete="off" />
-        <button class="clear-btn" id="clearBtn" title="검색어 지우기">&times;</button>
-      </div>
-
-      <div class="filter-group" id="categoryFilters"></div>
-      <div class="sub-filter-group" id="typeFilters" style="display: none;"></div>
     </div>
   </header>
 
-  <main class="container">
+  <div class="container">
+    <!-- 12슬롯 시그널 체인 빌더 -->
+    <section class="builder-section">
+      <div class="builder-toolbar">
+        <div class="builder-title">
+          <span>Signal Chain (12 Slots)</span>
+          <span class="builder-hint" id="selectedSlotHint">선택된 슬롯: #1 (A1)</span>
+        </div>
+
+        <div class="preset-controls">
+          <input type="text" id="presetNameInput" placeholder="프리셋 이름 (예: J-Rock Main)" style="width: 170px;" />
+          <button class="btn btn-accent" id="savePresetBtn">저장</button>
+          <select id="presetSelect">
+            <option value="">저장된 프리셋 불러오기...</option>
+          </select>
+          <button class="btn" id="deletePresetBtn" title="선택된 프리셋 삭제">삭제</button>
+          <button class="btn" id="copyChainBtn">세팅 텍스트 복사</button>
+          <button class="btn btn-danger" id="clearAllSlotsBtn">전체 비우기</button>
+        </div>
+      </div>
+
+      <!-- Chain A (Slot 1 ~ 6) -->
+      <div class="chain-row">
+        <div class="chain-label"><span class="dot"></span> CHAIN A (SLOTS 1 - 6)</div>
+        <div class="slots-grid" id="chainAGrid"></div>
+      </div>
+
+      <!-- Chain B (Slot 7 ~ 12) -->
+      <div class="chain-row">
+        <div class="chain-label"><span class="dot" style="background-color:#3b82f6;"></span> CHAIN B (SLOTS 7 - 12)</div>
+        <div class="slots-grid" id="chainBGrid"></div>
+      </div>
+    </section>
+
+    <!-- 검색 및 카테고리 필터 -->
+    <section class="filter-section">
+      <div class="search-row">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="모델명 또는 실제 장비명 검색 (예: TS-808, JCM900, Centaur, Ross, Chorus...)" autocomplete="off" />
+          <button class="clear-btn" id="clearBtn">&times;</button>
+        </div>
+        <div class="count-info">
+          <strong id="visibleCount">0</strong> / <span id="totalCount">0</span>개
+        </div>
+      </div>
+      <div class="filter-group" id="categoryFilters"></div>
+      <div class="sub-filter-group" id="typeFilters" style="display: none;"></div>
+    </section>
+
+    <!-- 이펙터 테이블 -->
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th style="width: 100px;">Category</th>
-            <th style="width: 150px;">Type</th>
-            <th style="width: 240px;">Model Name</th>
+            <th style="width: 90px;">Category</th>
+            <th style="width: 140px;">Type</th>
+            <th style="width: 220px;">Model Name</th>
             <th>Based On</th>
+            <th style="width: 110px; text-align: right;">슬롯 장착</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -330,17 +635,14 @@
         검색 조건에 맞는 이펙터/앰프 모델이 없습니다.
       </div>
     </div>
-  </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
-    /**
-     * [선택 사항] 구글 스프레드시트 실시간 CSV 연동 URL
-     * 구글 시트에서 [파일] -> [공유] -> [웹에 게시] -> [쉼표로 구분된 값(.csv)] 선택 후
-     * 발급된 링크를 아래 변수에 넣으면 시트 수정 시 자동 반영됩니다.
-     */
-    const GOOGLE_SHEET_CSV_URL = ""; 
+    // 구글 시트 웹 게시 CSV URL (연동 원할 시 입력)
+    const GOOGLE_SHEET_CSV_URL = "";
 
-    // 시트 기본 내장 데이터
     const FALLBACK_DATA = [
       ["DRV","Overdrive","Green Drive","Ibanez TS-808 Tube Screamer"],
       ["DRV","Overdrive","Green 9","Ibanez TS-9 Tube Screamer"],
@@ -551,6 +853,13 @@
     let activeType = "ALL";
     let searchQuery = "";
 
+    // 12개 슬롯 상태 관리
+    let slots = Array.from({ length: 12 }, () => null);
+    let selectedSlotIndex = 0;
+
+    const chainAGrid = document.getElementById("chainAGrid");
+    const chainBGrid = document.getElementById("chainBGrid");
+    const selectedSlotHint = document.getElementById("selectedSlotHint");
     const tableBody = document.getElementById("tableBody");
     const categoryFilters = document.getElementById("categoryFilters");
     const typeFilters = document.getElementById("typeFilters");
@@ -559,49 +868,287 @@
     const visibleCountEl = document.getElementById("visibleCount");
     const totalCountEl = document.getElementById("totalCount");
     const emptyState = document.getElementById("emptyState");
+    const toastEl = document.getElementById("toast");
 
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(() => toastEl.classList.remove("show"), 2000);
+    }
+
+    function getSlotLabel(idx) {
+      return idx < 6 ? `A${idx + 1}` : `B${idx - 5}`;
+    }
+
+    // 12슬롯 렌더링
+    function renderSlots() {
+      chainAGrid.innerHTML = "";
+      chainBGrid.innerHTML = "";
+      selectedSlotHint.textContent = `선택된 슬롯: #${selectedSlotIndex + 1} (${getSlotLabel(selectedSlotIndex)})`;
+
+      slots.forEach((slotData, idx) => {
+        const card = document.createElement("div");
+        const isSelected = idx === selectedSlotIndex;
+        const isBypassed = slotData && slotData.bypassed;
+        card.className = "slot-card" + (isSelected ? " selected" : "") + (isBypassed ? " bypassed" : "");
+
+        const header = document.createElement("div");
+        header.className = "slot-header";
+
+        const numSpan = document.createElement("span");
+        numSpan.className = "slot-num";
+        numSpan.textContent = `#${idx + 1} (${getSlotLabel(idx)})`;
+        header.appendChild(numSpan);
+
+        if (slotData) {
+          const actions = document.createElement("div");
+          actions.className = "slot-actions";
+
+          // ON/OFF 토글 버튼
+          const pwrBtn = document.createElement("button");
+          pwrBtn.className = "slot-icon-btn" + (!slotData.bypassed ? " power-on" : "");
+          pwrBtn.title = "ON / OFF 바이패스";
+          pwrBtn.textContent = "●";
+          pwrBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            slotData.bypassed = !slotData.bypassed;
+            saveWorkingChain();
+            renderSlots();
+          });
+
+          // 좌로 이동
+          const leftBtn = document.createElement("button");
+          leftBtn.className = "slot-icon-btn";
+          leftBtn.title = "이전 슬롯과 위치 교환";
+          leftBtn.textContent = "◀";
+          leftBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (idx > 0) {
+              [slots[idx - 1], slots[idx]] = [slots[idx], slots[idx - 1]];
+              selectedSlotIndex = idx - 1;
+              saveWorkingChain();
+              renderSlots();
+            }
+          });
+
+          // 우로 이동
+          const rightBtn = document.createElement("button");
+          rightBtn.className = "slot-icon-btn";
+          rightBtn.title = "다음 슬롯과 위치 교환";
+          rightBtn.textContent = "▶";
+          rightBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (idx < 11) {
+              [slots[idx + 1], slots[idx]] = [slots[idx], slots[idx + 1]];
+              selectedSlotIndex = idx + 1;
+              saveWorkingChain();
+              renderSlots();
+            }
+          });
+
+          // 삭제
+          const delBtn = document.createElement("button");
+          delBtn.className = "slot-icon-btn";
+          delBtn.title = "슬롯 비우기";
+          delBtn.textContent = "×";
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            slots[idx] = null;
+            selectedSlotIndex = idx;
+            saveWorkingChain();
+            renderSlots();
+          });
+
+          actions.append(pwrBtn, leftBtn, rightBtn, delBtn);
+          header.appendChild(actions);
+        }
+
+        card.appendChild(header);
+
+        if (!slotData) {
+          const emptyBody = document.createElement("div");
+          emptyBody.className = "slot-body-empty";
+          emptyBody.innerHTML = `<span>+ EMPTY</span><span style="font-size:0.7rem;font-weight:400;">클릭 후 이펙터 선택</span>`;
+          card.appendChild(emptyBody);
+        } else {
+          const filledBody = document.createElement("div");
+          filledBody.className = "slot-body-filled";
+          filledBody.innerHTML = `
+            <div class="slot-cat-row">
+              <span class="cat-badge cat-${slotData.category}">${slotData.category}</span>
+              <span style="font-size:0.72rem; color:var(--text-secondary);">${slotData.type}</span>
+            </div>
+            <div class="slot-model" title="${slotData.model}">${slotData.model}</div>
+            <div class="slot-based" title="${slotData.basedOn}">${slotData.basedOn}</div>
+          `;
+          card.appendChild(filledBody);
+        }
+
+        card.addEventListener("click", () => {
+          selectedSlotIndex = idx;
+          renderSlots();
+          renderTable();
+        });
+
+        if (idx < 6) {
+          chainAGrid.appendChild(card);
+        } else {
+          chainBGrid.appendChild(card);
+        }
+      });
+    }
+
+    // 선택한 슬롯에 이펙터 장착
+    function assignItemToSlot(item) {
+      slots[selectedSlotIndex] = { ...item, bypassed: false };
+      const assignedLabel = `#${selectedSlotIndex + 1} (${getSlotLabel(selectedSlotIndex)})`;
+
+      // 다음 빈 슬롯이 있으면 자동으로 포커스 이동
+      const nextEmpty = slots.findIndex((s, i) => i > selectedSlotIndex && s === null);
+      if (nextEmpty !== -1) {
+        selectedSlotIndex = nextEmpty;
+      } else if (selectedSlotIndex < 11) {
+        selectedSlotIndex++;
+      }
+
+      saveWorkingChain();
+      renderSlots();
+      renderTable();
+      showToast(`${assignedLabel} 슬롯에 [${item.model}] 장착 완료`);
+    }
+
+    // 로컬 스토리지 작업 상태 유지 및 프리셋 관리
+    function saveWorkingChain() {
+      localStorage.setItem("ampero_working_chain_12", JSON.stringify(slots));
+    }
+
+    function loadWorkingChain() {
+      try {
+        const saved = localStorage.getItem("ampero_working_chain_12");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length === 12) {
+            slots = parsed;
+          }
+        }
+      } catch (e) {}
+    }
+
+    function getSavedPresets() {
+      try {
+        return JSON.parse(localStorage.getItem("ampero_presets_12") || "{}");
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function refreshPresetDropdown() {
+      const presets = getSavedPresets();
+      const select = document.getElementById("presetSelect");
+      select.innerHTML = `<option value="">저장된 프리셋 불러오기...</option>`;
+      Object.keys(presets).forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+    }
+
+    document.getElementById("savePresetBtn").addEventListener("click", () => {
+      const nameInput = document.getElementById("presetNameInput");
+      const name = nameInput.value.trim();
+      if (!name) {
+        showToast("프리셋 이름을 입력해 주세요.");
+        nameInput.focus();
+        return;
+      }
+      const presets = getSavedPresets();
+      presets[name] = slots;
+      localStorage.setItem("ampero_presets_12", JSON.stringify(presets));
+      refreshPresetDropdown();
+      document.getElementById("presetSelect").value = name;
+      showToast(`프리셋 [${name}] 저장 완료`);
+    });
+
+    document.getElementById("presetSelect").addEventListener("change", (e) => {
+      const name = e.target.value;
+      if (!name) return;
+      const presets = getSavedPresets();
+      if (presets[name]) {
+        slots = JSON.parse(JSON.stringify(presets[name]));
+        document.getElementById("presetNameInput").value = name;
+        saveWorkingChain();
+        renderSlots();
+        showToast(`프리셋 [${name}] 불러오기 완료`);
+      }
+    });
+
+    document.getElementById("deletePresetBtn").addEventListener("click", () => {
+      const select = document.getElementById("presetSelect");
+      const name = select.value;
+      if (!name) {
+        showToast("삭제할 프리셋을 먼저 선택해 주세요.");
+        return;
+      }
+      const presets = getSavedPresets();
+      delete presets[name];
+      localStorage.setItem("ampero_presets_12", JSON.stringify(presets));
+      refreshPresetDropdown();
+      showToast(`프리셋 [${name}] 삭제 완료`);
+    });
+
+    document.getElementById("clearAllSlotsBtn").addEventListener("click", () => {
+      slots = Array.from({ length: 12 }, () => null);
+      selectedSlotIndex = 0;
+      saveWorkingChain();
+      renderSlots();
+      renderTable();
+      showToast("12개 슬롯을 모두 비웠습니다.");
+    });
+
+    document.getElementById("copyChainBtn").addEventListener("click", () => {
+      const presetName = document.getElementById("presetNameInput").value.trim() || "Custom Patch";
+      const lines = [`[Ampero Stage 12-Slot Patch: ${presetName}]`];
+      slots.forEach((s, i) => {
+        const label = getSlotLabel(i);
+        if (!s) {
+          lines.push(`${label}: (Empty)`);
+        } else {
+          const state = s.bypassed ? "[OFF]" : "[ON]";
+          lines.push(`${label} ${state}: [${s.category}] ${s.model} (${s.basedOn})`);
+        }
+      });
+      navigator.clipboard.writeText(lines.join("\n")).then(() => {
+        showToast("클립보드에 12슬롯 세팅 텍스트가 복사되었습니다!");
+      });
+    });
+
+    // CSV 파서 및 데이터 초기화
     function parseCSV(text) {
       const rows = [];
-      let row = [];
-      let cur = "";
-      let inQuotes = false;
+      let row = [], cur = "", inQuotes = false;
       for (let i = 0; i < text.length; i++) {
         const ch = text[i];
         if (inQuotes) {
-          if (ch === '"' && text[i + 1] === '"') {
-            cur += '"';
-            i++;
-          } else if (ch === '"') {
-            inQuotes = false;
-          } else {
-            cur += ch;
-          }
+          if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+          else if (ch === '"') inQuotes = false;
+          else cur += ch;
         } else {
-          if (ch === '"') {
-            inQuotes = true;
-          } else if (ch === ",") {
-            row.push(cur.trim());
-            cur = "";
-          } else if (ch === "\n" || ch === "\r") {
-            if (cur || row.length > 0) {
-              row.push(cur.trim());
-              rows.push(row);
-              row = [];
-              cur = "";
-            }
-          } else {
-            cur += ch;
-          }
+          if (ch === '"') inQuotes = true;
+          else if (ch === ",") { row.push(cur.trim()); cur = ""; }
+          else if (ch === "\n" || ch === "\r") {
+            if (cur || row.length > 0) { row.push(cur.trim()); rows.push(row); row = []; cur = ""; }
+          } else cur += ch;
         }
       }
-      if (cur || row.length > 0) {
-        row.push(cur.trim());
-        rows.push(row);
-      }
+      if (cur || row.length > 0) { row.push(cur.trim()); rows.push(row); }
       return rows;
     }
 
     async function initData() {
+      loadWorkingChain();
+      refreshPresetDropdown();
+
       if (GOOGLE_SHEET_CSV_URL) {
         try {
           const res = await fetch(GOOGLE_SHEET_CSV_URL);
@@ -623,6 +1170,7 @@
       }
 
       totalCountEl.textContent = allItems.length;
+      renderSlots();
       renderCategoryButtons();
       renderTable();
     }
@@ -651,16 +1199,13 @@
         typeFilters.innerHTML = "";
         return;
       }
-
       const types = ["ALL", ...new Set(
         allItems.filter(i => i.category === activeCategory).map(i => i.type)
       )];
-
       if (types.length <= 2) {
         typeFilters.style.display = "none";
         return;
       }
-
       typeFilters.style.display = "flex";
       typeFilters.innerHTML = "";
       types.forEach(type => {
@@ -698,17 +1243,20 @@
       }
       emptyState.style.display = "none";
 
+      const targetLabel = getSlotLabel(selectedSlotIndex);
       const fragment = document.createDocumentFragment();
       filtered.forEach(item => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td class="col-meta">
-            <span class="cat-badge cat-${item.category}">${item.category}</span>
-          </td>
+          <td><span class="cat-badge cat-${item.category}">${item.category}</span></td>
           <td class="type-text">${item.type}</td>
-          <td class="col-model model-name">${item.model}</td>
-          <td class="col-based based-on">${item.basedOn}</td>
+          <td class="model-name">${item.model}</td>
+          <td class="based-on">${item.basedOn}</td>
+          <td class="col-action" style="text-align: right;">
+            <button class="assign-btn">+ ${targetLabel} 장착</button>
+          </td>
         `;
+        tr.addEventListener("click", () => assignItemToSlot(item));
         fragment.appendChild(tr);
       });
       tableBody.appendChild(fragment);
